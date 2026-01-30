@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Order | Boosting Glove</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{
+  --bg:#f6f7fb;
+  --card:#ffffff;
+  --primary:#ff4d4f;
+  --primary-soft:#ffe8e8;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --border:#e6e8f0;
+}
+*{box-sizing:border-box;font-family:Inter,system-ui,-apple-system,sans-serif;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);}
+
+/* HEADER */
+.header{height:64px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;}
+.brand{font-weight:700;font-size:18px;color:var(--primary)}
+.user{font-size:14px;color:var(--muted);font-weight:500;margin-right:10px}
+.logout-btn{background:#ff4d4f;color:#fff;border:none;padding:6px 12px;border-radius:6px;cursor:pointer}
+
+/* LAYOUT */
+.container-layout{display:flex;height:calc(100vh - 64px)}
+.sidebar{width:240px;background:#fff;border-right:1px solid var(--border);padding:18px 14px;display:flex;flex-direction:column}
+.sidebar a{display:flex;align-items:center;gap:10px;padding:12px 14px;margin-bottom:6px;border-radius:10px;color:var(--text);text-decoration:none;font-weight:500;transition:.15s}
+.sidebar a.active,.sidebar a:hover{background:var(--primary-soft);color:var(--primary)}
+.main{flex:1;padding:26px;overflow:auto;}
+
+/* CARD */
+.card{
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 20px;
+  max-width: 800px; 
+  margin: 0 auto; 
+}
+
+/* PLATFORM ICONS */
+.platforms{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.platforms button{
+  width:50px;height:50px;
+  display:flex;align-items:center;justify-content:center;
+  border:1px solid #ddd;background:#fff;border-radius:14px;
+  cursor:pointer;font-size:22px;
+}
+.platforms button.active{
+  background:var(--primary);
+  border-color:var(--primary);
+}
+.platforms button.active i{color:#fff !important}
+
+.platforms i.fa-tiktok{color:#000}
+.platforms i.fa-instagram{color:#C13584}
+.platforms i.fa-youtube{color:#ff0000}
+.platforms i.fa-facebook{color:#1877f2}
+.platforms i.fa-telegram{color:#229ED9}
+.platforms i.fa-whatsapp{color:#25D366}
+.platforms i.fa-x-twitter{color:#000}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr;gap:16px}
+label{font-weight:600;font-size:14px;display:block;margin-top:10px}
+select,input,textarea{width:100%;padding:12px;border-radius:10px;border:1px solid #ddd;font-size:14px}
+.note{background:#fafafa;border:1px dashed #ddd;border-radius:12px;padding:14px;font-size:13px;line-height:1.6}
+.price-box{margin-top:15px;font-size:16px;font-weight:700}
+.badge{display:inline-block;background:#e6f7ee;color:#0a7a3f;padding:4px 10px;border-radius:999px;font-size:12px;margin-left:6px}
+.desc{margin-top:10px;font-size:13px;color:#555}
+.comment-box{display:none;margin-top:10px}
+.comment-box.active{display:block}
+
+/* ORDER BUTTON */
+button.order{
+  margin-top:16px;
+  width:180px; 
+  padding:10px 12px;
+  border:none;
+  border-radius:10px;
+  background:var(--primary);
+  color:#fff;
+  font-weight:700;
+  font-size:14px;
+  cursor:pointer;
+}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .container-layout{flex-direction:column;}
+  .sidebar{width:100%;display:flex;overflow-x:auto;margin-bottom:10px;}
+  .sidebar a{white-space:nowrap;margin-right:6px;}
+  .form-grid{grid-template-columns:1fr;}
+}
+
+/* MODAL */
+.modal{
+  position:fixed;
+  top:0; left:0; right:0; bottom:0;
+  background:rgba(0,0,0,0.5);
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:9999;
+  backdrop-filter: blur(6px);
+}
+.modal-content{
+  background:#fff;
+  border-radius:20px;
+  max-width:500px;
+  width:90%;
+  padding:30px 40px;
+  text-align:center;
+  box-shadow:0 10px 40px rgba(0,0,0,0.25);
+  animation:slideUp 0.3s ease-out;
+}
+.modal-header{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:15px;
+  background:linear-gradient(90deg,#ff4d4f,#ff7a7a);
+  color:#fff;
+  padding:20px;
+  border-radius:16px 16px 0 0;
+}
+.modal-header i{font-size:50px;}
+.modal-header h2{font-size:24px;margin:0;}
+.modal-body{margin-top:20px;text-align:center;}
+#modalSummary{
+  white-space:pre-wrap;
+  font-size:16px;
+  background:#f9f9f9;
+  padding:15px;
+  border-radius:12px;
+  border:1px solid #eee;
+  margin-bottom:20px;
+}
+#closeModalBtn, #viewOrdersBtn{
+  border:none;
+  border-radius:12px;
+  font-weight:700;
+  font-size:16px;
+  cursor:pointer;
+  display:block;
+  width:160px;
+  margin:10px auto 0 auto;
+  padding:12px 0;
+}
+#closeModalBtn{background:#ff4d4f;color:#fff;}
+#viewOrdersBtn{background:#1877f2;color:#fff;}
+@keyframes slideUp{0%{transform: translateY(50px); opacity:0;}100%{transform: translateY(0); opacity:1;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="brand">Boosting Glove</div>
+  <div>
+    <span class="user" id="userEmail">Hi, Demo</span>
+    <button class="logout-btn" id="logoutBtn">Logout</button>
+  </div>
+</div>
+
+<div class="container-layout">
+  <div class="sidebar">
+    <a href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="new-order.html" class="active"><i class="fas fa-cart-plus"></i> New Order</a>
+    <a href="orders.html"><i class="fas fa-list"></i> Orders</a>
+    <a href="wallet.html"><i class="fas fa-wallet"></i> Wallet</a>
+    <a href="support.html"><i class="fas fa-headset"></i> Support</a>
+  </div>
+
+  <div class="main">
+    <div class="card">
+      <h2>New Order</h2>
+      <div class="platforms" id="platforms"></div>
+
+      <div class="form-grid">
+        <div>
+          <label>Service</label>
+          <select id="serviceSelect"></select>
+
+          <label>Type</label>
+          <select id="typeSelect"></select>
+
+          <div class="comment-box" id="commentBox">
+            <label>Custom Comments </label>
+            <textarea id="customComments" rows="4" placeholder="Enter your comments here..."></textarea>
+          </div>
+
+          <label>Account / Post Link</label>
+          <input id="linkInput" placeholder="https://" />
+
+          <label>Quantity</label>
+          <input id="qtyInput" type="number" placeholder="Enter quantity" />
+
+          <div class="price-box" id="priceBox">Total: ₦0</div>
+          <div class="desc" id="descBox"></div>
+        </div>
+
+        <div class="note">
+          <b>Note:</b><br>
+          1. Make sure your account is public.<br>
+          2. Do not change username while order is running.<br>
+          3. Refill services guarantee refills on drops.<br>
+          4. No-refill services are cheaper but drops are not replaced.
+        </div>
+      </div>
+
+      <button class="order" id="placeOrderBtn">Place Order</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div id="orderModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <i class="fas fa-check-circle"></i>
+      <h2>Order Placed!</h2>
+    </div>
+    <div class="modal-body">
+      <pre id="modalSummary"></pre>
+      <button id="closeModalBtn">OK</button>
+      <button id="viewOrdersBtn">View Orders</button>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById("userEmail").textContent = "Hi, " + (localStorage.getItem("loggedUsername") || "Demo");
+
+const DATA={
+ TikTok:{Followers:[{name:"Followers",refill:true,rate:12.5,min:50,max:500000,desc:"TikTok followers with refill guarantee."},{name:"Followers",refill:false,rate:10.5,min:50,max:300000,desc:"TikTok followers without refill."}],
+ Likes:[{name:"Likes",refill:true,rate:0.55,min:50,max:600000,desc:"TikTok likes with refill guarantee."},{name:"Likes",refill:false,rate:0.45,min:50,max:500000,desc:"TikTok likes without refill."}],
+ Views:[{name:"Views",refill:false,rate:0.18,min:100,max:5000000,desc:"Fast TikTok views."}],
+ Shares:[{name:"Shares",refill:false,rate:0.35,min:50,max:500000,desc:"TikTok post shares."}],
+ Saves:[{name:"Saves",refill:false,rate:0.25,min:50,max:500000,desc:"TikTok post saves."}],
+ Comments:[{name:"Comments",refill:false,rate:1.2,min:10,max:10000,desc:"TikTok comments on post."}]},
+ Instagram:{Followers:[{name:"Followers",refill:true,rate:14,min:50,max:400000,desc:"Instagram followers with refill."},{name:"Followers",refill:false,rate:12,min:50,max:300000,desc:"Instagram followers without refill."}],
+ Likes:[{name:"Likes",refill:true,rate:0.8,min:50,max:400000,desc:"Instagram likes with refill."},{name:"Likes",refill:false,rate:0.65,min:50,max:300000,desc:"Instagram likes without refill."}],
+ Views:[{name:"Views",refill:false,rate:0.2,min:50,max:500000,desc:"Instagram story or reel views."}],
+ Saves:[{name:"Saves",refill:false,rate:0.3,min:50,max:300000,desc:"Instagram post saves."}]},
+ YouTube:{Subscribers:[{name:"Subscribers",refill:true,rate:35,min:50,max:100000,desc:"YouTube subscribers with refill."},{name:"Subscribers",refill:false,rate:30,min:50,max:80000,desc:"YouTube subscribers without refill."}],
+ Likes:[{name:"Likes",refill:false,rate:0.5,min:50,max:500000,desc:"YouTube video likes."}],
+ Views:[{name:"Views",refill:false,rate:0.3,min:50,max:1000000,desc:"YouTube video views."}]},
+ Facebook:{Followers:[{name:"Followers",refill:true,rate:16,min:50,max:300000,desc:"Facebook followers with refill."},{name:"Followers",refill:false,rate:14,min:50,max:250000,desc:"Facebook followers without refill."}],
+ Likes:[{name:"Likes",refill:true,rate:1.2,min:50,max:300000,desc:"Facebook likes with refill."},{name:"Likes",refill:false,rate:1.0,min:50,max:250000,desc:"Facebook likes without refill."}],
+ Shares:[{name:"Shares",refill:false,rate:0.8,min:50,max:200000,desc:"Facebook post shares."}],
+ Views:[{name:"Views",refill:false,rate:0.5,min:50,max:500000,desc:"Facebook video views."}]},
+ Telegram:{Members:[{name:"Members",refill:true,rate:9,min:50,max:300000,desc:"Telegram members with refill."},{name:"Members",refill:false,rate:7.5,min:50,max:200000,desc:"Telegram members without refill."}]},
+ WhatsApp:{Members:[{name:"Members",refill:true,rate:18,min:50,max:100000,desc:"WhatsApp group members with refill."},{name:"Members",refill:false,rate:15,min:50,max:80000,desc:"WhatsApp group members without refill."}]},
+ X:{Followers:[{name:"Followers",refill:true,rate:20,min:50,max:200000,desc:"X (Twitter) followers with refill."},{name:"Followers",refill:false,rate:17,min:50,max:150000,desc:"X (Twitter) followers without refill."}],
+ Likes:[{name:"Likes",refill:true,rate:2,min:50,max:50000,desc:"X (Twitter) likes with refill."},{name:"Likes",refill:false,rate:1.5,min:50,max:40000,desc:"X (Twitter) likes without refill."}],
+ Retweets:[{name:"Retweets",refill:false,rate:1.8,min:50,max:20000,desc:"X (Twitter) retweets."}]}
+};
+
+const ICONS={TikTok:"fa-brands fa-tiktok",Instagram:"fa-brands fa-instagram",YouTube:"fa-brands fa-youtube",Facebook:"fa-brands fa-facebook",Telegram:"fa-brands fa-telegram",WhatsApp:"fa-brands fa-whatsapp",X:"fa-brands fa-x-twitter"};
+
+let currentPlatform='TikTok',currentService=null,currentType=null;
+const platformsDiv=document.getElementById('platforms'),
+      serviceSelect=document.getElementById('serviceSelect'),
+      typeSelect=document.getElementById('typeSelect'),
+      qtyInput=document.getElementById('qtyInput'),
+      linkInput=document.getElementById('linkInput'),
+      priceBox=document.getElementById('priceBox'),
+      descBox=document.getElementById('descBox'),
+      commentBox=document.getElementById('commentBox'),
+      placeOrderBtn=document.getElementById('placeOrderBtn');
+
+// WALLET DEMO
+if(!localStorage.getItem("walletBalance")) localStorage.setItem("walletBalance","1000");
+let walletBalance = Number(localStorage.getItem("walletBalance"));
+
+// INIT PLATFORMS
+function initPlatforms(){
+  Object.keys(DATA).forEach(p=>{
+    const btn=document.createElement('button');
+    btn.innerHTML=`<i class='${ICONS[p]}'></i>`;
+    if(p===currentPlatform) btn.classList.add('active');
+    btn.onclick=()=>{
+      currentPlatform=p;
+      document.querySelectorAll('.platforms button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      loadServices();
+    };
+    platformsDiv.appendChild(btn);
+  });
+}
+
+function loadServices(){
+  serviceSelect.innerHTML='';
+  const services=Object.keys(DATA[currentPlatform]);
+  services.forEach(s=>{
+    const opt=document.createElement('option');
+    opt.value=s; opt.textContent=s;
+    serviceSelect.appendChild(opt);
+  });
+  currentService = services[0];
+  loadTypes();
+}
+
+function loadTypes(){
+  typeSelect.innerHTML='';
+  const types=DATA[currentPlatform][currentService];
+  types.forEach((t,i)=>{
+    const opt=document.createElement('option');
+    opt.value=i;
+    opt.textContent=`${t.name} – ${t.refill?'Refill':'No Refill'} | ₦${t.rate}/1k | Min ${t.min} | Max ${t.max}`;
+    typeSelect.appendChild(opt);
+  });
+  currentType = types[0];
+  updateInfo();
+  handleCommentBox();
+}
+
+function updateInfo(){
+  if(!currentType) return;
+  const qty = Number(qtyInput.value||0);
+  const total = ((qty/1000)*currentType.rate)||0;
+  priceBox.textContent = `Total: ₦${total.toFixed(2)}`;
+  descBox.innerHTML = `${currentType.desc} <span class='badge'>${currentType.refill?'Refill':'No Refill'}</span>`;
+  handleCommentBox();
+}
+
+function handleCommentBox(){
+  commentBox.classList.toggle('active', currentPlatform==='TikTok' && currentService==='Comments');
+}
+
+// EVENT LISTENERS
+serviceSelect.onchange=()=>{currentService=serviceSelect.value;loadTypes();}
+typeSelect.onchange=()=>{currentType=DATA[currentPlatform][currentService][typeSelect.value];updateInfo();}
+qtyInput.oninput=updateInfo;
+
+// MODAL ELEMENTS
+const modal = document.getElementById('orderModal'),
+      modalSummary = document.getElementById('modalSummary'),
+      closeModalBtn = document.getElementById('closeModalBtn'),
+      viewOrdersBtn = document.getElementById('viewOrdersBtn');
+
+// PLACE ORDER
+placeOrderBtn.onclick = () => {
+  if(!currentType){alert("Please select a service.");return;}
+  if(!linkInput.value.trim()){alert("Please enter account or post link.");return;}
+  const qty = Number(qtyInput.value);
+  if(!qty || qty<currentType.min || qty>currentType.max){alert(`Quantity must be between ${currentType.min} and ${currentType.max}.`);return;}
+  const total = ((qty/1000)*currentType.rate).toFixed(2);
+  if(walletBalance<total){alert(`Insufficient funds! Wallet: ₦${walletBalance.toFixed(2)}`); return;}
+  walletBalance -= total;
+  localStorage.setItem("walletBalance", walletBalance.toFixed(2));
+  
+  let summary = `Platform: ${currentPlatform}\nService: ${currentService}\nType: ${currentType.name} (${currentType.refill?'Refill':'No Refill'})\nQuantity: ${qty}\nTotal: ₦${total}\nWallet Left: ₦${walletBalance.toFixed(2)}`;
+  if(currentPlatform==='TikTok' && currentService==='Comments'){
+    const custom = document.getElementById('customComments').value.trim();
+    summary += `\nCustom Comments: ${custom||'None'}`;
+  }
+  
+  modalSummary.textContent = summary;
+  modal.style.display = 'flex';
+}
+
+closeModalBtn.onclick = ()=>{modal.style.display='none';linkInput.value='';qtyInput.value='';if(currentPlatform==='TikTok' && currentService==='Comments')document.getElementById('customComments').value='';updateInfo();}
+viewOrdersBtn.onclick = ()=>window.location.href="orders.html";
+
+// INIT
+initPlatforms(); loadServices();
+</script>
+
+</body>
+</html>

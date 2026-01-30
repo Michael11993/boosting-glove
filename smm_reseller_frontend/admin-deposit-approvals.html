@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin • Deposit Approvals | Boosting Glove</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg:#f6f7fb;
+      --card:#ffffff;
+      --primary:#ff4d4f;
+      --text:#1f2937;
+      --muted:#6b7280;
+      --success:#16a34a;
+      --danger:#dc2626;
+    }
+    *{box-sizing:border-box;font-family:Inter,sans-serif}
+    body{margin:0;background:var(--bg);color:var(--text)}
+    header{padding:20px 30px;font-size:20px;font-weight:700}
+    .container{padding:0 30px 40px}
+    .card{background:var(--card);border-radius:14px;padding:20px;box-shadow:0 10px 30px rgba(0,0,0,.06)}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:14px 10px;text-align:left;font-size:14px}
+    th{color:var(--muted);font-weight:600;border-bottom:1px solid #eee}
+    tr:not(:last-child) td{border-bottom:1px solid #f0f0f0}
+    .badge{padding:5px 10px;border-radius:999px;font-size:12px;font-weight:600}
+    .pending{background:#fff7ed;color:#c2410c}
+    .approved{background:#ecfdf5;color:#065f46}
+    .rejected{background:#fef2f2;color:#7f1d1d}
+    .btn{padding:8px 14px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+    .approve{background:var(--success);color:white}
+    .reject{background:var(--danger);color:white}
+    .view{background:#e5e7eb}
+    .actions{display:flex;gap:8px}
+    img{max-width:80px;border-radius:6px;cursor:pointer}
+    .empty{text-align:center;color:var(--muted);padding:40px}
+
+    /* modal */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:center;justify-content:center}
+    .modal-content{background:white;padding:20px;border-radius:14px;max-width:500px;width:90%}
+    .modal-content img{max-width:100%}
+  </style>
+</head>
+<body>
+
+<header>Deposit Approvals</header>
+
+<div class="container">
+  <div class="card">
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Amount</th>
+          <th>Bank</th>
+          <th>Proof</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="depositTable">
+        <tr><td colspan="6" class="empty">Loading deposits…</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Proof Modal -->
+<div class="modal" id="proofModal" onclick="closeModal()">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <img id="modalImage" />
+  </div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    // 🔥 YOUR CONFIG HERE
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const table = document.getElementById('depositTable');
+
+  auth.onAuthStateChanged(async user => {
+    if(!user){ location.href = '/login.html'; return; }
+
+    const token = await user.getIdTokenResult();
+    if(!token.claims.admin){ alert('Access denied'); location.href='/dashboard.html'; return; }
+
+    loadDeposits();
+  });
+
+  function loadDeposits(){
+    db.collection('deposits').orderBy('createdAt','desc').onSnapshot(snap => {
+      if(snap.empty){ table.innerHTML = '<tr><td colspan="6" class="empty">No deposits yet</td></tr>'; return; }
+
+      table.innerHTML='';
+      snap.forEach(doc =>{
+        const d = doc.data();
+        table.innerHTML += `
+          <tr>
+            <td>${d.userEmail || 'User'}</td>
+            <td>₦${Number(d.amount).toLocaleString()}</td>
+            <td>${d.bank}</td>
+            <td><img src="${d.proofImage}" onclick="viewImage('${d.proofImage}')"></td>
+            <td><span class="badge ${d.status}">${d.status}</span></td>
+            <td class="actions">
+              ${d.status==='pending' ? `
+                <button class="btn approve" onclick="approve('${doc.id}','${d.userId}',${d.amount})">Approve</button>
+                <button class="btn reject" onclick="reject('${doc.id}')">Reject</button>
+              ` : ''}
+            </td>
+          </tr>`;
+      });
+    });
+  }
+
+  async function approve(id,userId,amount){
+    if(!confirm('Approve this deposit?')) return;
+
+    const userRef = db.collection('users').doc(userId);
+    const depRef = db.collection('deposits').doc(id);
+
+    await db.runTransaction(async tx =>{
+      const userSnap = await tx.get(userRef);
+      const balance = userSnap.data().balance || 0;
+
+      tx.update(userRef,{ balance: balance + amount });
+      tx.update(depRef,{ status:'approved', approvedAt: firebase.firestore.FieldValue.serverTimestamp() });
+    });
+
+    alert('Deposit approved & balance credited');
+  }
+
+  async function reject(id){
+    if(!confirm('Reject this deposit?')) return;
+    await db.collection('deposits').doc(id).update({ status:'rejected' });
+  }
+
+  function viewImage(src){
+    document.getElementById('modalImage').src = src;
+    document.getElementById('proofModal').style.display='flex';
+  }
+  function closeModal(){ document.getElementById('proofModal').style.display='none'; }
+</script>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Firestore Test</title>
+</head>
+<body>
+<h2>Firestore Test</h2>
+<div id="status">Checking Firestore...</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+<script>
+// Firebase config
+firebase.initializeApp({
+  apiKey: "AIzaSyDra5RZapLa5B59MtBO32Vg1qCmAPQnqeQ",
+  authDomain: "boosting-glove.firebaseapp.com",
+  projectId: "boosting-glove",
+  appId: "1:666485031832:web:e6fffc638a87a70de761ed"
+});
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+const statusEl = document.getElementById("status");
+
+// First, sign in (for testing, we can hardcode a user that exists)
+const testEmail = "YOUR_SIGNUP_EMAIL@gmail.com";
+const testPassword = "YOUR_PASSWORD";
+
+// Sign in the test user
+auth.signInWithEmailAndPassword(testEmail, testPassword)
+  .then(userCredential => {
+    statusEl.innerHTML = "Signed in successfully.<br>Fetching user document...";
+
+    const user = userCredential.user;
+    db.collection("users").doc(user.uid).get()
+      .then(doc => {
+        if(doc.exists){
+          statusEl.innerHTML = "User document found:<br>" +
+            "Username: " + doc.data().username + "<br>" +
+            "Balance: " + doc.data().balance;
+        } else {
+          statusEl.innerHTML = "User document NOT found in Firestore.";
+        }
+      })
+      .catch(err => {
+        statusEl.innerHTML = "Error fetching user document:<br>" + err.message;
+        console.error(err);
+      });
+  })
+  .catch(err => {
+    statusEl.innerHTML = "Sign-in error:<br>" + err.message;
+    console.error(err);
+  });
+</script>
+</body>
+</html>

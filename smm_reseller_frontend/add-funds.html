@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Funds | Boosting Glove</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+:root{
+  --bg:#f6f7fb;
+  --card:#ffffff;
+  --border:#e6e8f0;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --accent:#ff3d3d;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+body{background:var(--bg);color:var(--text);}
+
+/* HEADER */
+.header{
+  background:#fff;
+  border-bottom:1px solid var(--border);
+  padding:18px 30px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.logo{font-size:22px;font-weight:700;}
+.logo span{color:var(--accent);}
+.user span{font-size:14px;color:var(--muted);}
+
+/* MAIN */
+.main{
+  max-width:720px;
+  margin:40px auto;
+  padding:0 20px;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:30px;
+}
+
+h1{
+  color:var(--accent);
+  margin-bottom:10px;
+}
+.desc{
+  color:var(--muted);
+  margin-bottom:20px;
+}
+
+/* BANK CARDS */
+.banks{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+  margin-bottom:20px;
+}
+.bank{
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:15px;
+}
+.bank h3{
+  font-size:15px;
+  margin-bottom:6px;
+}
+.bank p{
+  font-size:14px;
+  color:var(--muted);
+}
+
+/* NOTE */
+.note{
+  background:#fff1f1;
+  border:1px dashed var(--accent);
+  padding:15px;
+  border-radius:12px;
+  font-size:14px;
+  margin-bottom:25px;
+}
+.note ul{
+  padding-left:18px;
+}
+.note li{
+  margin-bottom:6px;
+}
+
+/* FORM */
+label{
+  display:block;
+  margin-bottom:6px;
+  font-size:14px;
+  color:var(--muted);
+}
+input, select{
+  width:100%;
+  padding:12px;
+  margin-bottom:15px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  font-size:14px;
+}
+button{
+  background:var(--accent);
+  color:#fff;
+  padding:12px;
+  border:none;
+  border-radius:12px;
+  font-weight:600;
+  cursor:pointer;
+  width:100%;
+}
+button:hover{opacity:0.9}
+
+/* SUCCESS */
+.success{
+  display:none;
+  text-align:center;
+}
+.success i{
+  font-size:48px;
+  color:#22c55e;
+  margin-bottom:10px;
+}
+.backBtn{
+  margin-top:20px;
+  background:#111827;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="logo">Boosting<span>Glove</span></div>
+  <div class="user">
+    <span id="userEmail">Loading...</span>
+  </div>
+</div>
+
+<main class="main">
+
+  <div class="card" id="depositCard">
+    <h1>Manual Deposit Upload</h1>
+    <p class="desc">
+      Deposit into any of the accounts below and upload your proof for manual confirmation (3–5 minutes).
+    </p>
+
+    <div class="banks">
+      <div class="bank">
+        <h3>🏦 Sterling Bank</h3>
+        <p>Account Name: <strong>Omorogbe Aisosa Michael</strong></p>
+        <p>Account Number: <strong>0013111916</strong></p>
+      </div>
+      <div class="bank">
+        <h3>🏦 Moniepoint</h3>
+        <p>Account Name: <strong>Omorogbe Aisosa Michael</strong></p>
+        <p>Account Number: <strong>9039094832</strong></p>
+      </div>
+    </div>
+
+    <div class="note">
+      <ul>
+        <li>Minimum deposit is <strong>₦1,000</strong></li>
+        <li>Input the exact amount sent to avoid delays</li>
+        <li>Do not send funds to any other account</li>
+      </ul>
+    </div>
+
+    <form id="depositForm">
+      <label>Amount Sent (₦)</label>
+      <input type="number" min="1000" required>
+
+      <label>Bank Used</label>
+      <select required>
+        <option value="">Select bank</option>
+        <option>Sterling Bank</option>
+        <option>Moniepoint</option>
+      </select>
+
+      <label>Upload Proof (Image only)</label>
+      <input type="file" accept="image/*" required>
+
+      <button type="submit">Submit Deposit</button>
+    </form>
+  </div>
+
+  <div class="card success" id="successCard">
+    <i class="fa-solid fa-circle-check"></i>
+    <h2>Deposit Submitted</h2>
+    <p style="color:var(--muted)">
+      Your deposit is pending confirmation.
+    </p>
+
+    <button class="backBtn" onclick="window.location.href='dashboard.html'">
+      Back to Dashboard
+    </button>
+  </div>
+
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDra5RZapLa5B59MtBO32Vg1qCmAPQnqeQ",
+  authDomain: "boosting-glove.firebaseapp.com",
+  projectId: "boosting-glove",
+  storageBucket: "boosting-glove.firebasestorage.app",
+  messagingSenderId: "666485031832",
+  appId: "1:666485031832:web:e6fffc638a87a70de761ed"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUser = null;
+
+onAuthStateChanged(auth, user=>{
+  if(!user) return window.location.replace("login.html");
+  currentUser = user;
+  document.getElementById("userEmail").textContent = user.email;
+});
+
+document.getElementById("depositForm").addEventListener("submit", async e=>{
+  e.preventDefault();
+
+  await addDoc(collection(db,"deposits"),{
+    userId: currentUser.uid,
+    status: "pending",
+    createdAt: serverTimestamp()
+  });
+
+  document.getElementById("depositCard").style.display="none";
+  document.getElementById("successCard").style.display="block";
+});
+</script>
+
+</body>
+</html>

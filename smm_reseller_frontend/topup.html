@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Fund Wallet</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Paystack Inline -->
+<script src="https://js.paystack.co/v1/inline.js"></script>
+
+<style>
+body{
+  background:#f4f6f8;
+  font-family:'Segoe UI',Tahoma;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+.card{
+  background:#fff;
+  padding:25px;
+  border-radius:16px;
+  max-width:420px;
+  width:100%;
+  box-shadow:0 20px 40px rgba(0,0,0,.15);
+}
+h2{
+  text-align:center;
+  color:#8e44ad;
+  margin-bottom:20px;
+}
+input,button{
+  width:100%;
+  padding:12px;
+  border-radius:10px;
+  margin-top:12px;
+  font-size:15px;
+}
+input{
+  border:1px solid #ccc;
+}
+button{
+  border:none;
+  background:#8e44ad;
+  color:#fff;
+  cursor:pointer;
+}
+.note{
+  text-align:center;
+  font-size:13px;
+  color:#555;
+  margin-top:12px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h2>Fund Wallet</h2>
+
+  <input type="number" id="amount" placeholder="Enter amount (₦500 minimum)">
+  <button onclick="payWithPaystack()">Proceed to Paystack</button>
+
+  <div class="note">
+    Secure payment powered by Paystack
+  </div>
+</div>
+
+<script>
+// LOGIN CHECK
+const user = localStorage.getItem("loggedInUser");
+if (!user) {
+  location.href = "login.html";
+}
+
+function payWithPaystack(){
+  const amount = Number(document.getElementById("amount").value);
+
+  if (amount < 500) {
+    alert("Minimum funding is ₦500");
+    return;
+  }
+
+  let handler = PaystackPop.setup({
+    key: 'pk_test_4f0887f6b80b729a6984ff7218f972daf5a30e12',
+    email: user + "@example.com",
+    amount: amount * 100, // kobo
+    currency: "NGN",
+    ref: "BG-" + Date.now(),
+
+    callback: function(response){
+      savePendingTransaction(amount, response.reference);
+      alert("Payment successful. Awaiting confirmation.");
+      location.href = "dashboard.html";
+    },
+
+    onClose: function(){
+      alert("Payment cancelled");
+    }
+  });
+
+  handler.openIframe();
+}
+
+function savePendingTransaction(amount, ref){
+  let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+
+  transactions.push({
+    id: ref,
+    amount: amount,
+    desc: "Wallet Funding (Paystack)",
+    time: new Date().toLocaleString(),
+    status: "PENDING",
+    type: "credit"
+  });
+
+  localStorage.setItem("transactions", JSON.stringify(transactions));
+}
+</script>
+
+</body>
+</html>

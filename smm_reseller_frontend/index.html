@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boosting Glove — SMM Panel</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0d0e13;
+  --panel:#141622;
+  --panel-soft:#10121a;
+  --border:#1f2233;
+  --text:#eaeaf0;
+  --muted:#b6b8c6;
+  --accent:#ff3d3d;
+  --accent-soft:#ff7a3d;
+}
+
+/* RESET */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Inter',sans-serif;
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  overflow-x:hidden;
+  animation:fadeIn .9s ease forwards;
+}
+
+@keyframes fadeIn{
+  from{opacity:0; transform:translateY(8px);}
+  to{opacity:1; transform:none;}
+}
+
+/* HEADER */
+header{
+  position:sticky;
+  top:0;
+  z-index:100;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:22px 70px;
+  background:rgba(13,14,19,.75);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+}
+
+.logo{
+  font-size:22px;
+  font-weight:700;
+  letter-spacing:.3px;
+}
+
+.logo span{
+  color:var(--accent);
+}
+
+.auth-actions{
+  display:flex;
+  gap:14px;
+}
+
+.auth-actions button{
+  padding:12px 28px;
+  border-radius:12px;
+  font-weight:500;
+  cursor:pointer;
+  transition:.3s ease;
+}
+
+.login-btn{
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text);
+}
+
+.login-btn:hover{
+  background:#16182a;
+}
+
+.signup-btn{
+  background:linear-gradient(135deg,var(--accent),var(--accent-soft));
+  border:none;
+  color:#fff;
+  font-weight:600;
+}
+
+.signup-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 25px 60px rgba(255,61,61,.45);
+}
+
+/* HERO */
+.hero{
+  display:grid;
+  grid-template-columns:1.1fr .9fr;
+  gap:70px;
+  padding:110px 70px;
+  align-items:center;
+}
+
+.hero h1{
+  font-size:52px;
+  line-height:1.12;
+  margin-bottom:22px;
+  position:relative;
+}
+
+.hero h1::before{
+  content:"";
+  position:absolute;
+  inset:-40px;
+  background:radial-gradient(circle,rgba(255,61,61,.18),transparent 70%);
+  z-index:-1;
+}
+
+.hero h1 span{
+  color:var(--accent);
+}
+
+.hero p{
+  max-width:540px;
+  color:var(--muted);
+  font-size:17px;
+  margin-bottom:40px;
+}
+
+.actions{
+  display:flex;
+  gap:16px;
+}
+
+.actions a{
+  text-decoration:none;
+}
+
+.primary-btn{
+  padding:16px 38px;
+  background:linear-gradient(135deg,var(--accent),var(--accent-soft));
+  border-radius:14px;
+  color:#fff;
+  font-weight:600;
+  box-shadow:0 20px 40px rgba(255,61,61,.25);
+  transition:.3s ease;
+}
+
+.primary-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 30px 70px rgba(255,61,61,.45);
+}
+
+.primary-btn:active{
+  transform:scale(.97);
+}
+
+.secondary-btn{
+  padding:16px 38px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  color:var(--text);
+  transition:.25s ease;
+}
+
+.secondary-btn:hover{
+  background:#16182a;
+}
+
+/* HERO CARD */
+.hero-card{
+  background:linear-gradient(180deg,var(--panel),var(--panel-soft));
+  border-radius:22px;
+  padding:45px;
+  border:1px solid var(--border);
+  box-shadow:0 40px 90px rgba(0,0,0,.6);
+  animation:floatCard 6s ease-in-out infinite;
+}
+
+@keyframes floatCard{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-10px);}
+}
+
+.hero-card h3{
+  margin-bottom:18px;
+  font-size:20px;
+}
+
+.hero-card ul{
+  list-style:none;
+}
+
+.hero-card li{
+  margin-bottom:14px;
+  color:var(--muted);
+  font-size:15px;
+}
+
+/* FEATURES */
+.features{
+  padding:100px 70px;
+  background:#0b0c11;
+}
+
+.features h2{
+  text-align:center;
+  font-size:38px;
+  margin-bottom:60px;
+}
+
+.features h2::after{
+  content:"";
+  display:block;
+  width:60px;
+  height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent-soft));
+  margin:18px auto 0;
+  border-radius:20px;
+}
+
+.features-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:34px;
+}
+
+.feature{
+  background:var(--panel);
+  padding:40px;
+  border-radius:20px;
+  border:1px solid var(--border);
+  transition:.35s ease;
+}
+
+.feature:hover{
+  transform:translateY(-10px);
+  border-color:var(--accent);
+  box-shadow:0 30px 60px rgba(0,0,0,.55);
+}
+
+.feature .icon{
+  width:46px;
+  height:46px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:14px;
+  background:rgba(255,61,61,.12);
+  margin-bottom:18px;
+  font-size:20px;
+}
+
+.feature h3{
+  color:var(--accent);
+  margin-bottom:12px;
+}
+
+.feature p{
+  color:var(--muted);
+  font-size:15px;
+}
+
+/* CTA */
+.cta{
+  padding:110px 70px;
+  text-align:center;
+  background:radial-gradient(circle at top,rgba(255,61,61,.18),transparent 60%);
+}
+
+.cta h2{
+  font-size:40px;
+  margin-bottom:22px;
+}
+
+.cta h2::after{
+  content:"";
+  display:block;
+  width:60px;
+  height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent-soft));
+  margin:18px auto 0;
+  border-radius:20px;
+}
+
+.cta p{
+  color:var(--muted);
+  margin-bottom:40px;
+}
+
+/* FOOTER */
+footer{
+  padding:45px 70px;
+  background:#0b0c11;
+  border-top:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:20px;
+  color:var(--muted);
+  font-size:14px;
+  box-shadow:0 -30px 80px rgba(0,0,0,.6);
+}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  header{padding:18px 30px;}
+  .hero{
+    grid-template-columns:1fr;
+    padding:80px 30px;
+    text-align:center;
+  }
+  .hero p{margin:auto auto 35px;}
+  .actions{justify-content:center;}
+  .features,.cta,footer{padding:70px 30px;}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">Boosting<span>Glove</span></div>
+  <div class="auth-actions">
+    <button class="login-btn" onclick="location.href='login.html'">Login</button>
+    <button class="signup-btn" onclick="location.href='signup.html'">Create Account</button>
+  </div>
+</header>
+
+<section class="hero">
+  <div>
+    <h1>Grow Faster With <span>Boosting Glove</span></h1>
+    <p>
+      Boosting Glove is a premium SMM panel built for creators, brands,
+      and agencies who demand speed, stability, and real engagement.
+    </p>
+
+    <div class="actions">
+      <a href="signup.html" class="primary-btn">Get Started</a>
+      <a href="#features" class="secondary-btn">View Services</a>
+    </div>
+  </div>
+
+  <div class="hero-card">
+    <h3>Why Boosting Glove?</h3>
+    <ul>
+      <li>⚡ Instant order processing</li>
+      <li>🔒 Secure NGN & crypto payments</li>
+      <li>📈 Stable, high-quality services</li>
+      <li>🛠 Fully automated 24/7 system</li>
+    </ul>
+  </div>
+</section>
+
+<section class="features" id="features">
+  <h2>Everything You Need to Scale</h2>
+
+  <div class="features-grid">
+    <div class="feature">
+      <div class="icon">⚡</div>
+      <h3>Fast Delivery</h3>
+      <p>Orders begin instantly with live tracking.</p>
+    </div>
+
+    <div class="feature">
+      <div class="icon">🔒</div>
+      <h3>Secure Wallet</h3>
+      <p>Safe funding with Paystack & crypto.</p>
+    </div>
+
+    <div class="feature">
+      <div class="icon">📈</div>
+      <h3>Quality Services</h3>
+      <p>Low-drop services tested for stability.</p>
+    </div>
+
+    <div class="feature">
+      <div class="icon">🛠</div>
+      <h3>24/7 Automation</h3>
+      <p>Your orders run nonstop, even while you sleep.</p>
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <h2>Start Growing Today</h2>
+  <p>Create your free account and access premium services instantly.</p>
+  <a href="signup.html" class="primary-btn">Create Free Account</a>
+</section>
+
+<footer>
+  <div>© 2026 Boosting Glove</div>
+  <div>Send Us an Email at @</div>
+  <div>Built for creators & agencies</div>
+</footer>
+
+</body>
+</html>

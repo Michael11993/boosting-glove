@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wallet | Boosting Glove</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<style>
+:root{
+  --bg:#f6f7fb;
+  --card:#ffffff;
+  --border:#e6e8f0;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --accent:#ff3d3d;
+}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+body{background:var(--bg);color:var(--text);}
+
+.header{background:#fff;border-bottom:1px solid var(--border);padding:18px 30px;display:flex;align-items:center;justify-content:space-between;}
+.logo{font-size:22px;font-weight:700;}
+.logo span{ color:var(--accent); }
+.user{display:flex;align-items:center;gap:14px;}
+.user span{font-size:14px;color:var(--muted);}
+.logout{border:none;background:#ffe4e4;color:var(--accent);padding:8px 14px;border-radius:10px;cursor:pointer;font-weight:500;}
+
+.layout{display:grid;grid-template-columns:240px 1fr;min-height:calc(100vh - 70px);}
+.sidebar{background:#fff;border-right:1px solid var(--border);padding:22px;}
+.nav a{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;color:var(--text);text-decoration:none;font-size:14px;margin-bottom:6px;}
+.nav a.active,.nav a:hover{background:#fff1f1;color:var(--accent);}
+.main{padding:30px;}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px;margin-bottom:20px;}
+.card h3{font-size:14px;color:var(--muted);margin-bottom:10px;}
+.card .value{font-size:28px;font-weight:700;color:var(--accent);}
+
+.table{background:#fff;border:1px solid var(--border);border-radius:18px;overflow:hidden;margin-top:20px;}
+.table-header{padding:18px 22px;border-bottom:1px solid var(--border);font-weight:600;}
+.table table{width:100%;border-collapse:collapse;}
+.table th,.table td{padding:16px 22px;font-size:14px;border-bottom:1px solid var(--border);}
+.table th{text-align:left;color:var(--muted);background:#fafafa;}
+.badge{padding:4px 10px;border-radius:999px;font-size:12px;font-weight:500;}
+.badge.credit{background:#e6fffa;color:#047857;}
+.badge.debit{background:#fff3cd;color:#856404;}
+
+@media(max-width:900px){
+  .layout{grid-template-columns:1fr;}
+  .sidebar{display:none;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="logo">Boosting<span>Glove</span></div>
+  <div class="user">
+    <span id="userEmail">Loading...</span>
+    <button class="logout" id="logoutBtn">Logout</button>
+  </div>
+</div>
+
+<div class="layout">
+<aside class="sidebar">
+  <nav class="nav">
+    <a href="dashboard.html" class="sidebar-link" data-page="dashboard"><i class="fa-solid fa-grid-2"></i> Dashboard</a>
+    <a href="new-order.html" class="sidebar-link" data-page="new-order"><i class="fa-solid fa-cart-plus"></i> New Order</a>
+    <a href="orders.html" class="sidebar-link" data-page="orders"><i class="fa-solid fa-list"></i> Orders</a>
+    <a href="wallet.html" class="sidebar-link" data-page="wallet"><i class="fa-solid fa-wallet"></i> Wallet</a>
+    <a href="support.html" class="sidebar-link" data-page="support"><i class="fa-solid fa-headset"></i> Support</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <h2>Wallet</h2>
+
+  <div class="card">
+    <h3>Current Balance</h3>
+    <div class="value" id="walletBalance">₦0</div>
+  </div>
+
+  <div class="table">
+    <div class="table-header">Transaction History</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Amount</th>
+          <th>Description</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody id="transactionTable">
+        <tr>
+          <td colspan="4" style="text-align:center;color:#6b7280;">Loading transactions...</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+</div>
+
+<script>
+// Highlight active sidebar link
+const currentPage = window.location.pathname.split("/").pop().replace(".html","");
+document.querySelectorAll(".sidebar-link").forEach(link=>{
+  if(link.dataset.page === currentPage) link.classList.add("active");
+});
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, collection, query, where, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDra5RZapLa5B59MtBO32Vg1qCmAPQnqeQ",
+  authDomain: "boosting-glove.firebaseapp.com",
+  projectId: "boosting-glove",
+  storageBucket: "boosting-glove.firebasestorage.app",
+  messagingSenderId: "666485031832",
+  appId: "1:666485031832:web:e6fffc638a87a70de761ed"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+let currentUserUid = null;
+
+onAuthStateChanged(auth, async (user) => {
+  if(!user) return window.location.replace("login.html");
+  currentUserUid = user.uid;
+
+  // Load username
+  const userRef = doc(db, "users", user.uid);
+  const userSnap = await getDoc(userRef);
+  const username = userSnap.exists() ? userSnap.data().username : user.email;
+  document.getElementById("userEmail").textContent = username;
+
+  // Listen for wallet changes
+  onSnapshot(userRef, (snap)=>{
+    const wallet = snap.exists() ? snap.data().wallet || 0 : 0;
+    document.getElementById("walletBalance").textContent = `₦${wallet.toFixed(2)}`;
+  });
+
+  // Listen for transactions live
+  const txRef = collection(db, "transactions");
+  const txQuery = query(txRef, where("userId","==",user.uid), orderBy("createdAt","desc"));
+  const txTable = document.getElementById("transactionTable");
+
+  onSnapshot(txQuery, (snap)=>{
+    txTable.innerHTML = "";
+    if(snap.empty){
+      txTable.innerHTML = `<tr>
+        <td colspan="4" style="text-align:center;color:#6b7280;">No transactions yet</td>
+      </tr>`;
+    } else {
+      snap.forEach(docSnap=>{
+        const tx = docSnap.data();
+        const tr = document.createElement("tr");
+        const date = tx.createdAt?.toDate ? tx.createdAt.toDate().toLocaleString() : new Date(tx.createdAt).toLocaleString();
+        const typeClass = tx.type === "credit" ? "credit" : "debit";
+        tr.innerHTML = `
+          <td><span class="badge ${typeClass}">${tx.type}</span></td>
+          <td>₦${tx.amount}</td>
+          <td>${tx.description || "-"}</td>
+          <td>${date}</td>
+        `;
+        txTable.appendChild(tr);
+      });
+    }
+  });
+});
+
+// Logout
+document.getElementById("logoutBtn").onclick = async ()=>{
+  await signOut(auth);
+  window.location.replace("login.html");
+};
+</script>
+
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login | Boosting Glove</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--border:#e6e8f0;--text:#1f2937;--muted:#6b7280;--accent:#ff3d3d;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif;}
+body{min-height:100vh;background:linear-gradient(120deg,#f9fafb,#eef2ff);display:flex;align-items:center;justify-content:center;color:var(--text);}
+.wrapper{width:100%;max-width:800px;background:var(--card);border-radius:26px;display:grid;grid-template-columns:1fr 1fr;overflow:hidden;box-shadow:0 50px 100px rgba(0,0,0,.08);}
+.visual{background: linear-gradient(135deg,rgba(255,61,61,.9),rgba(255,122,61,.85)), url("https://images.unsplash.com/photo-1556761175-4b46a572b786");background-size:cover;background-position:center;padding:60px;color:#fff;display:flex;flex-direction:column;justify-content:center;}
+.visual h2{font-size:36px;margin-bottom:14px;}
+.visual p{font-size:16px;max-width:380px;opacity:.95;}
+.form-side{padding:55px;}
+.logo{font-size:24px;font-weight:700;margin-bottom:6px;}
+.logo span{color:var(--accent);}
+.subtitle{font-size:14px;color:var(--muted);margin-bottom:28px;}
+.form-group{margin-bottom:18px;}
+.form-group label{display:block;font-size:13px;margin-bottom:6px;color:var(--muted);}
+.form-group input{width:100%;padding:14px;border-radius:14px;border:1px solid var(--border);background:#fafafa;outline:none;}
+.form-group input:focus{border-color:var(--accent);background:#fff;}
+.input-wrap{position:relative;}
+.input-wrap input{padding-right:44px;}
+.input-wrap i{position:absolute;right:14px;top:50%;transform:translateY(-50%);cursor:pointer;color:#9ca3af;}
+.btn{width:100%;margin-top:10px;padding:15px;border:none;border-radius:16px;background:linear-gradient(135deg,var(--accent),#ff7a3d);color:#fff;font-weight:600;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;}
+.btn.loading{pointer-events:none;opacity:.85;}
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;display:none;}
+.btn.loading .spinner{display:block;}
+.btn.loading .btn-text{display:none;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.error{margin-top:14px;font-size:13px;color:#ef4444;text-align:center;display:none;}
+.links{text-align:center;margin-top:22px;font-size:13px;}
+.links a{color:var(--accent);text-decoration:none;}
+@media(max-width:900px){.wrapper{grid-template-columns:1fr;}.visual{display:none;}}
+</style>
+</head>
+<body>
+
+<div class="wrapper">
+  <div class="visual">
+    <h2>Welcome Back 👋</h2>
+    <p>Login with your username to continue to Boosting Glove dashboard.</p>
+  </div>
+
+  <div class="form-side">
+    <div class="logo">Boosting<span>Glove</span></div>
+    <div class="subtitle">Login to your account</div>
+
+    <form id="loginForm">
+      <div class="form-group"><label>Username</label><input type="text" id="username" required></div>
+      <div class="form-group"><label>Password</label><div class="input-wrap"><input type="password" id="password" required><i class="fa-solid fa-eye toggle"></i></div></div>
+      <button type="submit" class="btn" id="loginBtn"><span class="btn-text">Login</span><span class="spinner"></span></button>
+      <div class="error" id="errorMsg"></div>
+    </form>
+
+    <div class="links">Don't have an account? <a href="signup.html">Create one</a></div>
+    <div class="links"><a href="forgot-password.html">Forgot Password?</a></div>
+  </div>
+</div>
+
+<!-- 🔥 FIREBASE COMPAT SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+/* =========================
+   🔐 FIREBASE AUTH FIX
+========================= */
+
+const firebaseConfig = {
+  apiKey:"AIzaSyDra5RZapLa5B59MtBO32Vg1qCmAPQnqeQ",
+  authDomain:"boosting-glove.firebaseapp.com",
+  projectId:"boosting-glove",
+  storageBucket:"boosting-glove.firebasestorage.app",
+  messagingSenderId:"666485031832",
+  appId:"1:666485031832:web:e6fffc638a87a70de761ed"
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* ✅ FORCE LOCAL PERSISTENCE AND WAIT */
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+  .then(() => {
+    console.log("✅ Login persistence set to LOCAL");
+  })
+  .catch(err => {
+    console.error("❌ Persistence error:", err);
+  });
+
+const form = document.getElementById("loginForm");
+const btn = document.getElementById("loginBtn");
+const errorMsg = document.getElementById("errorMsg");
+const usernameInput = document.getElementById("username");
+const passwordInput = document.getElementById("password");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  errorMsg.style.display = "none";
+  btn.classList.add("loading");
+
+  try {
+    const usernameLower = usernameInput.value.trim().toLowerCase();
+
+    const usernameSnap = await db.collection("usernames").doc(usernameLower).get();
+    if (!usernameSnap.exists) throw new Error("Username not found");
+
+    const email = usernameSnap.data().email;
+
+    /* 🔐 LOGIN AFTER PERSISTENCE */
+    await auth.signInWithEmailAndPassword(email, passwordInput.value);
+
+    const userDoc = await db.collection("users").doc(auth.currentUser.uid).get();
+    localStorage.setItem("loggedUsername", userDoc.data().username);
+
+    window.location.replace("dashboard.html");
+  } catch (err) {
+    errorMsg.textContent = err.message;
+    errorMsg.style.display = "block";
+    btn.classList.remove("loading");
+  }
+});
+
+// Password toggle
+document.querySelectorAll(".toggle").forEach(icon => {
+  icon.onclick = () => {
+    const input = icon.previousElementSibling;
+    input.type = input.type === "password" ? "text" : "password";
+    icon.classList.toggle("fa-eye-slash");
+  };
+});
+</script>
+
+</body>
+</html>

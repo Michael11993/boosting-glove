@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FAQ - Boosting Glove</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins', sans-serif;
+}
+
+body{
+    background:#f5f3ff;
+    padding:20px;
+}
+
+/* Header */
+.header{
+    text-align:center;
+    margin-bottom:30px;
+}
+
+.header h1{
+    font-size:2rem;
+    color:#4a148c;
+    font-weight:600;
+}
+
+.back-btn{
+    display:inline-block;
+    background:#4a148c;
+    color:white;
+    padding:10px 20px;
+    margin-top:15px;
+    border-radius:10px;
+    text-decoration:none;
+    font-size:0.9rem;
+    transition:0.3s;
+}
+
+.back-btn:hover{
+    background:#6a1b9a;
+}
+
+/* FAQ */
+.faq-container{
+    max-width:700px;
+    margin:0 auto;
+}
+
+.faq-item{
+    background:white;
+    margin-bottom:15px;
+    padding:18px 20px;
+    border-radius:12px;
+    cursor:pointer;
+    box-shadow:0 6px 20px rgba(0,0,0,0.1);
+    transition:0.3s;
+}
+
+.faq-item:hover{
+    transform:scale(1.01);
+}
+
+.question{
+    font-size:1.05rem;
+    font-weight:500;
+    color:#4a148c;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.answer{
+    font-size:0.95rem;
+    color:#333;
+    margin-top:10px;
+    line-height:1.5;
+    display:none;
+}
+
+.icon{
+    font-size:1.3rem;
+    color:#6a1b9a;
+    transition:0.3s;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>Frequently Asked Questions</h1>
+    <a href="support.html" class="back-btn">Back to Home</a>
+</div>
+
+<div class="faq-container">
+
+    <div class="faq-item">
+        <div class="question">
+            <span>How do I place an order?</span>
+            <span class="icon">+</span>
+        </div>
+        <div class="answer">
+            Go to the services page, select a category, choose a service, enter your link or username, and click “Place Order”.
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <div class="question">
+            <span>How long does delivery take?</span>
+            <span class="icon">+</span>
+        </div>
+        <div class="answer">
+            Delivery time varies depending on the service. Most start instantly or within minutes, while others may take a few hours.
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <div class="question">
+            <span>What happens if my order does not deliver?</span>
+            <span class="icon">+</span>
+        </div>
+        <div class="answer">
+            You can contact our support team and provide your order ID. We will check and either refill or refund where required.
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <div class="question">
+            <span>Do you offer refunds?</span>
+            <span class="icon">+</span>
+        </div>
+        <div class="answer">
+            Refunds are issued only for orders that cannot be delivered. Completed orders are non-refundable.
+        </div>
+    </div>
+
+    <div class="faq-item">
+        <div class="question">
+            <span>Are the services safe?</span>
+            <span class="icon">+</span>
+        </div>
+        <div class="answer">
+            Yes, our services are tested, stable, and safe for use. We do not require login details for any order.
+        </div>
+    </div>
+
+</div>
+
+<script>
+const items = document.querySelectorAll(".faq-item");
+
+items.forEach(item => {
+    item.addEventListener("click", () => {
+        const answer = item.querySelector(".answer");
+        const icon = item.querySelector(".icon");
+        
+        if(answer.style.display === "block"){
+            answer.style.display = "none";
+            icon.textContent = "+";
+        } else {
+            answer.style.display = "block";
+            icon.textContent = "−";
+        }
+    });
+});
+</script>
+
+</body>
+</html>
